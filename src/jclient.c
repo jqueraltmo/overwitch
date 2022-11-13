@@ -631,7 +631,7 @@ int
 jclient_start (struct jclient *jclient)
 {
   int err = pthread_create (&jclient->thread, NULL, jclient_thread_runner,
-			     jclient);
+			    jclient);
   jclient->running = err ? 0 : 1;
   return err;
 }
