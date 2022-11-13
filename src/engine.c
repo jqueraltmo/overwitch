@@ -658,7 +658,7 @@ ow_engine_init (struct ow_engine *engine, int blocks_per_transfer)
       ret = OW_USB_ERROR_CANT_CLAIM_IF;
       goto cleanup;
     }
-  err = libusb_set_interface_alt_setting (engine->usb.device_handle, 0, 7);
+  err = libusb_set_interface_alt_setting (engine->usb.device_handle, 0, 4);
   if (LIBUSB_SUCCESS != err)
     {
       ret = OW_USB_ERROR_CANT_SET_ALT_SETTING;
@@ -670,7 +670,7 @@ ow_engine_init (struct ow_engine *engine, int blocks_per_transfer)
       ret = OW_USB_ERROR_CANT_CLAIM_IF;
       goto cleanup;
     }
-  err = libusb_set_interface_alt_setting (engine->usb.device_handle, 1, 7);
+  err = libusb_set_interface_alt_setting (engine->usb.device_handle, 1, 4);
   if (LIBUSB_SUCCESS != err)
     {
       ret = OW_USB_ERROR_CANT_SET_ALT_SETTING;
