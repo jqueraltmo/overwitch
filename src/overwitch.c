@@ -43,6 +43,7 @@
 
 #define DEV_TAG_PID "pid"
 #define DEV_TAG_NAME "name"
+#define DEV_TAG_TYPE "type"
 #define DEV_TAG_INPUT_TRACK_NAMES "input_track_names"
 #define DEV_TAG_OUTPUT_TRACK_NAMES "output_track_names"
 
@@ -50,6 +51,7 @@
 static const struct ow_device_desc_static DIGITAKT_DESC = {
   .pid = DTAKT_PID,
   .name = "Digitakt",
+  .type = OW_TYPE_OVERBRIDGE_V2,
   .inputs = 2,
   .outputs = 12,
   .input_track_names = {"Main L Input", "Main R Input"},
@@ -62,6 +64,7 @@ static const struct ow_device_desc_static DIGITAKT_DESC = {
 static const struct ow_device_desc_static DIGITONE_DESC = {
   .pid = DTONE_PID,
   .name = "Digitone",
+  .type = OW_TYPE_OVERBRIDGE_V2,
   .inputs = 2,
   .outputs = 12,
   .input_track_names = {"Main L Input", "Main R Input"},
@@ -74,6 +77,7 @@ static const struct ow_device_desc_static DIGITONE_DESC = {
 static const struct ow_device_desc_static AFMK2_DESC = {
   .pid = AFMK2_PID,
   .name = "Analog Four MKII",
+  .type = OW_TYPE_OVERBRIDGE_V2,
   .inputs = 6,
   .outputs = 8,
   .input_track_names = {"Main L Input", "Main R Input", "Synth Track 1 Input",
@@ -87,6 +91,7 @@ static const struct ow_device_desc_static AFMK2_DESC = {
 static const struct ow_device_desc_static ARMK2_DESC = {
   .pid = ARMK2_PID,
   .name = "Analog Rytm MKII",
+  .type = OW_TYPE_OVERBRIDGE_V2,
   .inputs = 12,
   .outputs = 12,
   .input_track_names =
@@ -101,6 +106,7 @@ static const struct ow_device_desc_static ARMK2_DESC = {
 static const struct ow_device_desc_static DKEYS_DESC = {
   .pid = DKEYS_PID,
   .name = "Digitone Keys",
+  .type = OW_TYPE_OVERBRIDGE_V2,
   .inputs = 2,
   .outputs = 12,
   .input_track_names = {"Main L Input", "Main R Input"},
@@ -113,6 +119,7 @@ static const struct ow_device_desc_static DKEYS_DESC = {
 static const struct ow_device_desc_static AHMK1_DESC = {
   .pid = AHMK1_PID,
   .name = "Analog Heat",
+  .type = OW_TYPE_OVERBRIDGE_V2,
   .inputs = 4,
   .outputs = 4,
   .input_track_names =
@@ -123,6 +130,7 @@ static const struct ow_device_desc_static AHMK1_DESC = {
 static const struct ow_device_desc_static AHMK2_DESC = {
   .pid = AHMK2_PID,
   .name = "Analog Heat MKII",
+  .type = OW_TYPE_OVERBRIDGE_V2,
   .inputs = 4,
   .outputs = 4,
   .input_track_names =
@@ -133,6 +141,7 @@ static const struct ow_device_desc_static AHMK2_DESC = {
 static const struct ow_device_desc_static STAKT_DESC = {
   .pid = STAKT_PID,
   .name = "Syntakt",
+  .type = OW_TYPE_OVERBRIDGE_V2,
   .inputs = 8,
   .outputs = 20,
   .input_track_names =
@@ -148,6 +157,7 @@ static const struct ow_device_desc_static STAKT_DESC = {
 static const struct ow_device_desc_static AFMKI_DESC = {
   .pid = AFMK1_PID,
   .name = "Analog Four MKI",
+  .type = OW_TYPE_OVERBRIDGE_V1,
   .inputs = 2,
   .outputs = 4,
   .input_track_names = {"Main L Input", "Main R Input"},
@@ -157,6 +167,7 @@ static const struct ow_device_desc_static AFMKI_DESC = {
 static const struct ow_device_desc_static ARMK1_DESC = {
   .pid = ARMK1_PID,
   .name = "Analog Rytm MKI",
+  .type = OW_TYPE_OVERBRIDGE_V1,
   .inputs = 2,
   .outputs = 4,
   .input_track_names = {"Main L Input", "Main R Input"},
@@ -164,9 +175,8 @@ static const struct ow_device_desc_static ARMK1_DESC = {
 };
 
 static const struct ow_device_desc_static *OB_DEVICE_DESCS[] = {
-  // &DIGITAKT_DESC, &DIGITONE_DESC, &AFMK2_DESC, &ARMK2_DESC, &DKEYS_DESC,
-  // &AHMK1_DESC, &AHMK2_DESC, &STAKT_DESC, NULL
-  &AFMKI_DESC, &ARMK1_DESC, NULL
+  &DIGITAKT_DESC, &DIGITONE_DESC, &AFMK2_DESC, &ARMK2_DESC, &DKEYS_DESC,
+  &AHMK1_DESC, &AHMK2_DESC, &STAKT_DESC, &AFMKI_DESC, &ARMK1_DESC, NULL
 };
 #endif
 
@@ -268,12 +278,32 @@ ow_get_usb_device_list (struct ow_usb_device **devices, size_t *size)
   return 0;
 }
 
+static void
+ow_set_usb_interfaces_and_alt_settings (struct ow_device_desc *device_desc)
+{
+  if (device_desc->type == OW_TYPE_OVERBRIDGE_V1)
+    {
+      device_desc->audio_if_1 = 0;
+      device_desc->audio_as_1 = 4;
+      device_desc->audio_if_2 = 1;
+      device_desc->audio_as_2 = 4;
+    }
+  else if (device_desc->type == OW_TYPE_OVERBRIDGE_V2)
+    {
+      device_desc->audio_if_1 = 1;
+      device_desc->audio_as_1 = 3;
+      device_desc->audio_if_2 = 2;
+      device_desc->audio_as_2 = 3;
+    }
+}
+
 void
 ow_copy_device_desc_static (struct ow_device_desc *device_desc,
 			    const struct ow_device_desc_static *d)
 {
   device_desc->pid = d->pid;
   device_desc->name = strdup (d->name);
+  device_desc->type = d->type;
   device_desc->inputs = d->inputs;
   device_desc->outputs = d->outputs;
   device_desc->input_track_names =
@@ -296,18 +326,20 @@ int
 ow_get_device_desc_from_vid_pid (uint16_t vid, uint16_t pid,
 				 struct ow_device_desc *device_desc)
 {
+  int err;
   if (vid != ELEKTRON_VID)
     {
       return 1;
     }
 
 #if defined(JSON_DEVS_FILE) && !defined(OW_TESTING)
-  gint dpid, err, devices;
+  gint dpid, devices;
   JsonParser *parser;
   JsonReader *reader;
   gchar *devices_filename;
   GError *error = NULL;
 
+  device_desc->type = OW_TYPE_NONE;
   device_desc->inputs = 0;
   device_desc->outputs = 0;
   device_desc->input_track_names = NULL;
@@ -395,6 +427,17 @@ ow_get_device_desc_from_vid_pid (uint16_t vid, uint16_t pid,
 	  break;
 	}
       device_desc->name = strdup (json_reader_get_string_value (reader));
+      json_reader_end_member (reader);
+
+      if (!json_reader_read_member (reader, DEV_TAG_TYPE))
+	{
+	  error_print ("Cannot read member '%s'. Stopping...\n",
+		       DEV_TAG_TYPE);
+	  json_reader_end_element (reader);
+	  err = -ENODEV;
+	  break;
+	}
+      device_desc->type = json_reader_get_int_value (reader);
       json_reader_end_member (reader);
 
       if (!json_reader_read_member (reader, DEV_TAG_INPUT_TRACK_NAMES))
@@ -493,19 +536,23 @@ cleanup_reader:
 cleanup_parser:
   g_object_unref (parser);
   g_free (devices_filename);
-  return err;
+
 #else
+  err = 1;
   for (const struct ow_device_desc_static ** d = OB_DEVICE_DESCS; *d != NULL;
        d++)
     {
       if ((*d)->pid == pid)
 	{
 	  ow_copy_device_desc_static (device_desc, *d);
-	  return 0;
+          err = 0;
+	  break;
 	}
     }
-  return 1;
 #endif
+
+  ow_set_usb_interfaces_and_alt_settings (device_desc);
+  return err;
 }
 
 int
