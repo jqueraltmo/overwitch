@@ -159,6 +159,8 @@
 
 #define OB_NAME_MAX_LEN 32
 
+#define OW_ISO_XFERS 8
+
 struct ow_engine
 {
   char name[OW_LABEL_MAX_LEN];
@@ -186,8 +188,10 @@ struct ow_engine
     libusb_device_handle *device_handle;
     //Audio
     uint16_t audio_frames_counter;
-    struct libusb_transfer *xfr_audio_in;
-    struct libusb_transfer *xfr_audio_out;
+    struct libusb_transfer *xfr_audio_in_int;
+    struct libusb_transfer *xfr_audio_out_int;
+    struct libusb_transfer *xfr_audio_in_iso[OW_ISO_XFERS];
+    struct libusb_transfer *xfr_audio_out_iso[OW_ISO_XFERS];
     unsigned char *xfr_audio_in_data;
     unsigned char *xfr_audio_out_data;
     size_t audio_in_blk_len;
